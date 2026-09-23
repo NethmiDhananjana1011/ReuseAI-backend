@@ -1,16 +1,17 @@
-const expreass = require('express');
+
+const express = require('express');
 const mongoose = require('mongoose');
 const Item = require('./models/Item');
-const cros = require('.models/Item');
+const cors = require('cors');
 
 const app = express();
-app.use(expreass.json());
+app.use(express.json());
 app.use(cors());
 
-mongoose.connect('mongodb://<db_username>:a6wtcfbhLJJN48Cj@ac-lihiprf-shard-00-00.fb0bm14.mongodb.net:27017,ac-lihiprf-shard-00-01.fb0bm14.mongodb.net:27017,ac-lihiprf-shard-00-02.fb0bm14.mongodb.net:27017/?ssl=true&replicaSet=atlas-oskgwd-shard-0&authSource=admin&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+// මතක ඇතුව <db_username> කියන තැනට ඔයාගේ MongoDB username එක දෙන්න
+// මතක ඇතුව <db_username> කියන තැනට ඔයාගේ MongoDB username එක දෙන්න
+mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac-lihiprf-shard-00-00.fb0bm14.mongodb.net:27017,ac-lihiprf-shard-00-01.fb0bm14.mongodb.net:27017,ac-lihiprf-shard-00-02.fb0bm14.mongodb.net:27017/?ssl=true&replicaSet=atlas-oskgwd-shard-0&authSource=admin&appName=Cluster0')
+.then(() => {
     console.log('Connected to MongoDB');
 }).catch(err =>
     console.log(err));
