@@ -11,10 +11,10 @@ app.use(cors());
 // මතක ඇතුව <db_username> කියන තැනට ඔයාගේ MongoDB username එක දෙන්න
 // මතක ඇතුව <db_username> කියන තැනට ඔයාගේ MongoDB username එක දෙන්න
 mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac-lihiprf-shard-00-00.fb0bm14.mongodb.net:27017,ac-lihiprf-shard-00-01.fb0bm14.mongodb.net:27017,ac-lihiprf-shard-00-02.fb0bm14.mongodb.net:27017/?ssl=true&replicaSet=atlas-oskgwd-shard-0&authSource=admin&appName=Cluster0')
-.then(() => {
-    console.log('Connected to MongoDB');
-}).catch(err =>
-    console.log(err));
+    .then(() => {
+        console.log('Connected to MongoDB');
+    }).catch(err =>
+        console.log(err));
 
 app.post('/api/items', async (req, res) => {
     try {
@@ -28,7 +28,22 @@ app.post('/api/items', async (req, res) => {
                 condition: req.body.condition
             })
         });
-        
+
+
+
+        // Database එකේ තියෙන Items ඔක්කොම ගන්න GET Request එක
+        app.get('/api/items', async (req, res) => {
+            try {
+                // අලුත්ම items මුලින් එන්න sort කරලා ගන්නවා (-1)
+                const items = await Item.find().sort({ createdAt: -1 });
+                res.status(200).json(items);
+            } catch (error) {
+                console.error("Error:", error);
+                res.status(500).json({ error: "Failed to fetch items" });
+            }
+        });
+
+
         const mlData = await mlResponse.json();
 
         // 2. Database එකට Item එක Save කිරීම
@@ -36,8 +51,8 @@ app.post('/api/items', async (req, res) => {
         await newItem.save();
 
         // 3. React එකට Item එකයි, Python එකෙන් ආපු Recommendations ටිකයි යැවීම
-        res.status(201).json({ 
-            message: "Item created successfully", 
+        res.status(201).json({
+            message: "Item created successfully",
             item: newItem,
             recommendations: mlData.recommendations // ML එකෙන් එන Result එක 
         });
