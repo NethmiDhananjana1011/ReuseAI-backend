@@ -18,11 +18,32 @@ mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac
 
 app.post('/api/items', async (req, res) => {
     try {
+        // 1. Python ML API එකට Data යවා Recommendations ලබාගැනීම
+        const mlResponse = await fetch('http://127.0.0.1:8000/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: req.body.name,
+                material: req.body.material,
+                condition: req.body.condition
+            })
+        });
+        
+        const mlData = await mlResponse.json();
+
+        // 2. Database එකට Item එක Save කිරීම
         const newItem = new Item(req.body);
         await newItem.save();
-        res.status(201).json({ message: "Item created successfully", item: newItem });
+
+        // 3. React එකට Item එකයි, Python එකෙන් ආපු Recommendations ටිකයි යැවීම
+        res.status(201).json({ 
+            message: "Item created successfully", 
+            item: newItem,
+            recommendations: mlData.recommendations // ML එකෙන් එන Result එක 
+        });
     } catch (error) {
-        res.status(500).json({ error: "Failed to add item" });
+        console.error("Error:", error);
+        res.status(500).json({ error: "Failed to process item and get recommendations" });
     }
 });
 
