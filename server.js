@@ -2,6 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Item = require('./models/Item');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('./models/User');
 
 const app = express();
 app.use(express.json());
