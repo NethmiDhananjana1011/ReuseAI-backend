@@ -16,6 +16,57 @@ mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac
     console.log('Connected to MongoDB');
 }).catch(err => console.log(err));
 
+// --- AUTHENTICATION APIs ---
+
+// 1. User Signup API
+app.post('/api/auth/signup', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        
+        // මේ Email එකෙන් කලින් User කෙනෙක් ඉන්නවද බලනවා
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ message: "User already exists" });
+
+        // Password එක Encrypt කරනවා (ආරක්ෂාවට)
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // අලුත් User ව Save කරනවා
+        const newUser = new User({ name, email, password: hashedPassword });
+        await newUser.save();
+
+        res.status(201).json({ message: "User created successfully" });
+    } catch (error) {
+        console.error("Signup Error:", error);
+        res.status(500).json({ error: "Signup failed" });
+    }
+});
+
+// 2. User Login API
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Email එකෙන් User ව හොයනවා
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Password එක හරිද කියලා check කරනවා
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) return res.status(400).json({ message: "Invalid credentials" });
+
+        // Login වුණාම Token එකක් හදනවා
+        const token = jwt.sign({ userId: user._id }, "reuseai_secret_key", { expiresIn: '7d' });
+
+        res.status(200).json({ 
+            message: "Login successful", 
+            token, 
+            user: { id: user._id, name: user.name, email: user.email } 
+        });
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ error: "Login failed" });
+    }
+});
 
 app.post('/api/items', async (req, res) => {
     try {
