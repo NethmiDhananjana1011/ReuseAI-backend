@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const itemSchema = new mongoose.Schema({
+  userId: {type:mongoose.Types.ObjectId,ref: 'User',require:true},
   name: { type: String, required: true },
   material: { type: String, required: true },
-  condition: { type: String, required: true }, // මෙතන Number වෙනුවට String වෙන්න ඕන
+  condition: { type: String, required: true }, 
   description: { type: String },
 }, { timestamps: true });
 
