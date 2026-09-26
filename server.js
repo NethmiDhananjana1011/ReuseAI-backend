@@ -13,7 +13,7 @@ mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac
     console.log('Connected to MongoDB');
 }).catch(err => console.log(err));
 
-// POST API - Item එක save කරන සහ Python එකෙන් AI Result එක ගන්න route එක
+
 app.post('/api/items', async (req, res) => {
     try {
         const mlResponse = await fetch('http://127.0.0.1:8000/recommend', {
@@ -42,6 +42,7 @@ app.post('/api/items', async (req, res) => {
     }
 });
 
+
 // GET API - Database එකේ තියෙන Items ඔක්කොම React එකට යවන route එක
 app.get('/api/items', async (req, res) => {
     try {
@@ -50,6 +51,17 @@ app.get('/api/items', async (req, res) => {
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Failed to fetch items" });
+    }
+});
+
+
+app.delete('/api/items/:id', async (req, res) => {
+    try {
+        await Item.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: "Item deleted successfully" });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Failed to delete item" });
     }
 });
 
