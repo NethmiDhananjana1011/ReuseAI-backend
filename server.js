@@ -72,14 +72,16 @@ app.post('/api/items', async (req, res) => {
         
         const mlData = await mlResponse.json();
         
-        // අලුත් Item එකේ විස්තර වලට userId එකත් එකතු කරලා Save කරනවා
+        // අලුත් Item එකේ විස්තර වලට AI Recommendations එකතු කරලා Save කරනවා
         const newItem = new Item({
             userId: req.body.userId,
             name: req.body.name,
             material: req.body.material,
             condition: req.body.condition,
-            description: req.body.description
+            description: req.body.description,
+            recommendations: mlData.recommendations // අලුත් පේළිය
         });
+        await newItem.save();
         await newItem.save();
 
         res.status(201).json({ 
