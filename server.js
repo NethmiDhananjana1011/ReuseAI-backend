@@ -19,46 +19,8 @@ mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac
 
 // --- AUTHENTICATION APIs ---
 
-app.post('/api/auth/signup', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: "User already exists" });
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, password: hashedPassword });
-        await newUser.save();
-
-        res.status(201).json({ message: "User created successfully" });
-    } catch (error) {
-        console.error("Signup Error:", error);
-        res.status(500).json({ error: "Signup failed" });
-    }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ message: "User not found" });
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(400).json({ message: "Invalid credentials" });
-
-        const token = jwt.sign({ userId: user._id }, "reuseai_secret_key", { expiresIn: '7d' });
-        res.status(200).json({ 
-            message: "Login successful", 
-            token, 
-            user: { id: user._id, name: user.name, email: user.email } 
-        });
-    } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({ error: "Login failed" });
-    }
-});
-
-
 // --- ITEM APIs ---
+
 
 app.post('/api/items', async (req, res) => {
     try {
@@ -73,7 +35,15 @@ app.post('/api/items', async (req, res) => {
         });
         
         const mlData = await mlResponse.json();
-        const newItem = new Item(req.body);
+        
+        // අලුත් Item එකේ විස්තර වලට userId එකත් එකතු කරලා Save කරනවා
+        const newItem = new Item({
+            userId: req.body.userId,
+            name: req.body.name,
+            material: req.body.material,
+            condition: req.body.condition,
+            description: req.body.description
+        });
         await newItem.save();
 
         res.status(201).json({ 
@@ -87,9 +57,11 @@ app.post('/api/items', async (req, res) => {
     }
 });
 
+// තමන්ගේ Items විතරක් බලාගන්න API එක
 app.get('/api/items', async (req, res) => {
     try {
-        const items = await Item.find().sort({ createdAt: -1 });
+        const { userId } = req.query; // Frontend එකෙන් එවන userId එක ගන්නවා
+        const items = await Item.find({ userId: userId }).sort({ createdAt: -1 });
         res.status(200).json(items);
     } catch (error) {
         console.error("Error:", error);
