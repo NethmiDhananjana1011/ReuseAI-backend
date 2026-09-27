@@ -17,6 +17,8 @@ mongoose.connect('mongodb://nethnethmidhananjana1011_db_user:a6wtcfbhLJJN48Cj@ac
 }).catch(err => console.log(err));
 
 
+// --- AUTHENTICATION APIs ---
+
 app.post('/api/auth/signup', async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -72,22 +74,28 @@ app.post('/api/items', async (req, res) => {
         
         const mlData = await mlResponse.json();
         
-        // අලුත් Item එකේ විස්තර වලට AI Recommendations එකතු කරලා Save කරනවා
+        // Python වලින් එන Data (Objects) වලින් 'reuse_option' කියන නම (String) විතරක් වෙන් කරගන්නවා
+        let formattedRecs = [];
+        if (mlData.recommendations && Array.isArray(mlData.recommendations)) {
+            formattedRecs = mlData.recommendations.map(rec => {
+                return rec.reuse_option ? rec.reuse_option : String(rec);
+            });
+        }
+        
         const newItem = new Item({
             userId: req.body.userId,
             name: req.body.name,
             material: req.body.material,
             condition: req.body.condition,
             description: req.body.description,
-            recommendations: mlData.recommendations // අලුත් පේළිය
+            recommendations: formattedRecs
         });
-        await newItem.save();
         await newItem.save();
 
         res.status(201).json({ 
             message: "Item created successfully", 
             item: newItem,
-            recommendations: mlData.recommendations 
+            recommendations: formattedRecs 
         });
     } catch (error) {
         console.error("Error:", error);
